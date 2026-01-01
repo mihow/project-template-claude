@@ -6,7 +6,21 @@ Priority-ordered list of tasks. Top = highest priority.
 
 - [ ] **Credit Monitoring Implementation** (see: features/credit-monitoring.md)
 
-## Up Next
+## Up Next (High Priority)
+
+- [ ] **LLM Task Verification** (see: features/llm-task-verification.md)
+  - Decide if task needs planning
+  - Verify task completion
+  - Detect stuck agents
+  - Generate test plans
+
+- [ ] **Docker Compose Testing Environment** (see: features/docker-compose-testing.md)
+  - CSV priority file support
+  - Docker containers for testing
+  - System service simulation
+  - Dev container
+
+## Medium Priority
 
 - [ ] Multi-model routing (Claude → Qwen → Gemini)
 - [ ] VM isolation per project
