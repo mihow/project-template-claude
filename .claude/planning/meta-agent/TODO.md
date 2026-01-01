@@ -4,21 +4,26 @@ Priority-ordered list of tasks. Top = highest priority.
 
 ## In Progress
 
-- [ ] **Credit Monitoring Implementation** (see: features/credit-monitoring.md)
+- [ ] **Docker Compose Primary Implementation** ⭐ NEW PRIORITY
+  - See: decisions/002-docker-compose-primary.md
+  - Replace tmux with Docker containers
+  - Orchestrator as container
+  - Agent containers (one per project)
+  - PostgreSQL for state
+  - CSV priority file
+  - System service via docker-compose
 
 ## Up Next (High Priority)
+
+- [ ] **Credit Monitoring Implementation** (see: features/credit-monitoring.md)
+  - Works with Docker containers
+  - Monitor from orchestrator
 
 - [ ] **LLM Task Verification** (see: features/llm-task-verification.md)
   - Decide if task needs planning
   - Verify task completion
   - Detect stuck agents
   - Generate test plans
-
-- [ ] **Docker Compose Testing Environment** (see: features/docker-compose-testing.md)
-  - CSV priority file support
-  - Docker containers for testing
-  - System service simulation
-  - Dev container
 
 ## Medium Priority
 

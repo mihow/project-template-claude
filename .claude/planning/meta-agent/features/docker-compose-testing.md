@@ -1,8 +1,11 @@
-# Docker Compose Testing & Simulation Environment
+# Docker Compose Primary Implementation
 
-**Status:** Planning
-**Priority:** Medium
-**Estimated Effort:** 6-8 hours
+**Status:** Planning → **NOW PRIMARY APPROACH** ⭐
+**Priority:** **HIGHEST**
+**Estimated Effort:** 8-12 hours (full implementation)
+
+**IMPORTANT:** This is now the MAIN implementation, not just testing.
+See: [ADR 002](../decisions/002-docker-compose-primary.md)
 
 ## Problem
 
