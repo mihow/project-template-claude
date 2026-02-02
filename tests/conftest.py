@@ -5,6 +5,7 @@ This file is automatically loaded by pytest and provides fixtures
 available to all test files.
 """
 
+import asyncio
 from pathlib import Path
 
 import pytest
@@ -100,8 +101,6 @@ def example_factory():
 @pytest.fixture
 def event_loop_policy():
     """Use default event loop policy for async tests."""
-    import asyncio
-
     return asyncio.DefaultEventLoopPolicy()
 
 
