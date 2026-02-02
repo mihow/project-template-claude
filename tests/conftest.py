@@ -85,7 +85,7 @@ def example_factory():
         id: str = "test-id",
         name: str = "Test",
         status: Status = Status.PENDING,
-        **kwargs,
+        **kwargs: object,
     ) -> Example:
         return Example(id=id, name=name, status=status, **kwargs)
 
@@ -100,7 +100,7 @@ def example_factory():
 @pytest.fixture
 def event_loop_policy():
     """Use default event loop policy for async tests."""
-    import asyncio  # noqa: PLC0415
+    import asyncio
 
     return asyncio.DefaultEventLoopPolicy()
 

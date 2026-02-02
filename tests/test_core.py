@@ -4,6 +4,8 @@ Tests for core business logic.
 These tests verify the main application functionality.
 """
 
+from unittest.mock import patch
+
 from my_project.core import create_example, process_example, validate_input
 from my_project.models import Status
 
@@ -61,8 +63,6 @@ class TestProcessExample:
 
     def test_handles_exception(self) -> None:
         """Exception during processing returns error result."""
-        from unittest.mock import patch
-
         with patch("my_project.core.create_example") as mock_create:
             mock_create.side_effect = ValueError("Test error")
             result = process_example("test")
@@ -87,6 +87,7 @@ class TestValidateInput:
         is_valid, error = validate_input("")
 
         assert is_valid is False
+        assert error is not None
         assert "empty" in error.lower()
 
     def test_exceeds_max_length(self) -> None:
@@ -95,6 +96,7 @@ class TestValidateInput:
         is_valid, error = validate_input(long_input, max_length=100)
 
         assert is_valid is False
+        assert error is not None
         assert "100" in error
 
     def test_custom_max_length(self) -> None:

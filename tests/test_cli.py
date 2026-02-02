@@ -142,30 +142,34 @@ class TestMain:
 
     def test_run_command_executes(self) -> None:
         """Run command executes successfully."""
-        with patch("sys.argv", ["my-project", "run", "--name", "test"]):
-            with patch("my_project.cli.cmd_run") as mock_cmd:
-                mock_cmd.return_value = 0
-                exit_code = main()
-                assert exit_code == 0
-                mock_cmd.assert_called_once()
+        with (
+            patch("sys.argv", ["my-project", "run", "--name", "test"]),
+            patch("my_project.cli.cmd_run") as mock_cmd,
+        ):
+            mock_cmd.return_value = 0
+            exit_code = main()
+            assert exit_code == 0
+            mock_cmd.assert_called_once()
 
     def test_info_command_executes(self) -> None:
         """Info command executes successfully."""
-        with patch("sys.argv", ["my-project", "info"]):
-            with patch("my_project.cli.cmd_info") as mock_cmd:
-                mock_cmd.return_value = 0
-                exit_code = main()
-                assert exit_code == 0
-                mock_cmd.assert_called_once()
+        with (
+            patch("sys.argv", ["my-project", "info"]),
+            patch("my_project.cli.cmd_info") as mock_cmd,
+        ):
+            mock_cmd.return_value = 0
+            exit_code = main()
+            assert exit_code == 0
+            mock_cmd.assert_called_once()
 
     def test_unknown_command_shows_help(self) -> None:
         """Unknown command shows help and returns 1."""
         # This tests the defensive code path, though argparse
         # would normally catch unknown commands
-        with patch("sys.argv", ["my-project", "run"]):
-            with patch("my_project.cli.create_parser") as mock_parser:
-                mock_parser.return_value.parse_args.return_value = argparse.Namespace(
-                    command="unknown"
-                )
-                exit_code = main()
-                assert exit_code == 1
+        with (
+            patch("sys.argv", ["my-project", "run"]),
+            patch("my_project.cli.create_parser") as mock_parser,
+        ):
+            mock_parser.return_value.parse_args.return_value = argparse.Namespace(command="unknown")
+            exit_code = main()
+            assert exit_code == 1

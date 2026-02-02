@@ -16,10 +16,10 @@ class TestStatus:
 
     def test_status_values(self) -> None:
         """Verify all expected status values exist."""
-        assert Status.PENDING == "pending"
-        assert Status.IN_PROGRESS == "in_progress"
-        assert Status.COMPLETED == "completed"
-        assert Status.FAILED == "failed"
+        assert Status.PENDING.value == "pending"
+        assert Status.IN_PROGRESS.value == "in_progress"
+        assert Status.COMPLETED.value == "completed"
+        assert Status.FAILED.value == "failed"
 
     def test_status_from_string(self) -> None:
         """Status can be created from string value."""
@@ -64,7 +64,7 @@ class TestExample:
     def test_invalid_id_raises(self) -> None:
         """Missing required fields raise validation error."""
         with pytest.raises(ValueError):
-            Example(name="No ID")  # type: ignore
+            Example(name="No ID")
 
 
 class TestResult:

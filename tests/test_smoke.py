@@ -18,8 +18,8 @@ class TestImports:
         from my_project import Example, Settings, __version__
 
         assert __version__
-        assert Settings
-        assert Example
+        assert Settings is not None
+        assert Example is not None
 
     def test_all_modules_import(self) -> None:
         """All submodules import without errors."""
