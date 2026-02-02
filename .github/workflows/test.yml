@@ -20,6 +20,7 @@ on:
 
 env:
   PYTHON_VERSION: "3.12"
+  UV_SYSTEM_PYTHON: "1"  # Use system Python (from setup-python) instead of venv
 
 jobs:
   # ===========================================================================
@@ -44,13 +45,10 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
-        run: uv pip install --system ruff
+        run: make install-dev
 
-      - name: Run ruff linter
-        run: ruff check src tests
-
-      - name: Run ruff formatter check
-        run: ruff format --check src tests
+      - name: Run lint and format check
+        run: make lint && make format-check
 
   # ===========================================================================
   # Testing
@@ -74,12 +72,10 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
-        run: |
-          uv pip install --system -e ".[dev]"
+        run: make install-dev
 
       - name: Run tests with coverage
-        run: |
-          pytest -v --cov=my_project --cov-report=xml --cov-report=term
+        run: make test-ci
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -110,11 +106,10 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
-        run: |
-          uv pip install --system -e ".[dev]"
+        run: make install-dev
 
       - name: Run mypy
-        run: mypy src
+        run: make typecheck
 
   # ===========================================================================
   # Build Verification
@@ -142,7 +137,7 @@ jobs:
         run: uv pip install --system build
 
       - name: Build package
-        run: python -m build
+        run: make build
 
       - name: Verify package
         run: |

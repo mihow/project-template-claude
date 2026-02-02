@@ -42,8 +42,11 @@ install-dev: ## Install development dependencies
 test: ## Run tests
 	pytest
 
-test-cov: ## Run tests with coverage report
+test-cov: ## Run tests with coverage report (local)
 	pytest --cov=my_project --cov-report=html --cov-report=term
+
+test-ci: ## Run tests with coverage for CI (xml output)
+	pytest -v --cov=my_project --cov-report=xml --cov-report=term
 
 test-fast: ## Run tests excluding slow tests
 	pytest -m "not slow"
