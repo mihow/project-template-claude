@@ -5,84 +5,40 @@ paths:
 
 # Verification Rules
 
-**CRITICAL: Code is not done until it's verified running.**
+**Verify what you changed. Use your judgment.**
 
-## Verification Levels
+## The Principle
 
-### Level 1: Imports (Minimum)
-Code must at least import without errors:
+If you changed something, verify that specific thing works. Don't just run tests and hope.
+
+| You changed... | Verify by... |
+|----------------|--------------|
+| Python code | `make ci` |
+| A GitHub workflow | Push, then check the Actions tab |
+| Pre-commit hooks | `pre-commit run --all-files` |
+| Dockerfile or compose | `docker compose build` |
+| CLI commands | Run the actual CLI command |
+| Configuration files | Use what consumes the config |
+| Dependencies | `make install-dev && make ci` |
+
+## Quick Reference
+
 ```bash
-python -c "from my_project import *"
+make ci       # Full CI locally (lint, format, typecheck, test)
+make verify   # Full verification (imports, tests, smoke, CLI)
+make help     # See all available commands
 ```
-
-### Level 2: Unit Tests
-Tests pass, but this is NECESSARY, NOT SUFFICIENT:
-```bash
-pytest
-```
-
-Unit tests can fake success. They test what you wrote, not what you intended.
-
-### Level 3: Smoke Tests (Required for "done")
-Actually run the code and verify output:
-```bash
-# CLI must execute
-my-project info
-my-project run --name test
-
-# Scripts must run
-python -m my_project.cli info
-```
-
-### Level 4: Integration Tests
-Test real integrations (databases, APIs, external services):
-```bash
-# With real dependencies
-docker compose up -d
-pytest -m integration
-```
-
-### Level 5: Browser/E2E Tests
-For anything with UI, use chrome-devtools MCP:
-- Navigate to the page
-- Take a screenshot
-- Verify visual output
-- Test user interactions
-
-## Before Declaring "Done"
-
-1. **Run it**: Execute the actual code path you changed
-2. **Verify output**: Check the output matches expectations
-3. **Test edge cases**: Try inputs that might break it
-4. **Check logs**: Look for warnings or errors
-5. **Screenshot if UI**: Visual verification for any interface
 
 ## Red Flags
 
-NEVER say code is "done" or "working" if you only:
+Don't say "done" if you only:
 - Wrote tests (tests can be wrong)
-- Checked syntax (doesn't mean it runs)
-- Read the code (doesn't mean it works)
+- Read the code (reading ≠ running)
 - Assumed it works (verify, don't assume)
 
-## Verification Commands
+## Common Mistakes
 
-Add to every task:
-```bash
-# After implementation, ALWAYS run:
-python -c "from my_project import *; print('imports ok')"
-pytest -x  # Stop on first failure
-my-project info  # Actually run CLI
-```
-
-## MCP Server Verification
-
-For MCP servers (chrome-devtools, pylsp), verify they're installed:
-```bash
-# Chrome DevTools
-npx @anthropic/mcp-server-chrome-devtools --version 2>/dev/null || echo "NOT INSTALLED"
-
-# Python LSP
-which pylsp || echo "NOT INSTALLED"
-pylsp --help 2>/dev/null | head -1 || echo "NOT WORKING"
-```
+- Committing without running `make ci` → lint/format/type errors in CI
+- Changing workflows without checking Actions tab → broken CI
+- Adding pre-commit hooks without running them → hooks fail on commit
+- Changing Docker without building → broken builds
