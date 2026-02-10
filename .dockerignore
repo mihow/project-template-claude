@@ -36,6 +36,7 @@ htmlcov
 
 # Type checking
 .mypy_cache
+.pyright
 
 # Documentation
 docs/_build

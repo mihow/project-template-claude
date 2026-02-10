@@ -26,7 +26,7 @@ my-project run --name verify-test
 
 # Level 5: Lint and type check
 ruff check src tests
-mypy src
+pyright src
 ```
 
 ## MCP Server Verification
@@ -46,7 +46,7 @@ which pylsp && pylsp --version 2>/dev/null && echo "OK" || echo "NOT INSTALLED"
 - [ ] Smoke tests pass (tests/test_smoke.py)
 - [ ] CLI commands execute successfully
 - [ ] No lint errors (ruff check)
-- [ ] Type check passes (mypy)
+- [ ] Type check passes (pyright)
 - [ ] Actually ran the code path that changed
 - [ ] Verified output is correct
 

@@ -104,7 +104,7 @@ services:
       - ./src:/app/src:ro
       - ./tests:/app/tests:ro
       - ./pyproject.toml:/app/pyproject.toml:ro
-    command: ["mypy", "src"]
+    command: ["pyright", "src"]
 
   # ===========================================================================
   # Production service (for testing production build)

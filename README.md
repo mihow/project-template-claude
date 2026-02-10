@@ -161,7 +161,7 @@ pytest -m "not slow"            # Skip slow tests
 # Code Quality
 ruff check src tests            # Lint
 ruff format src tests           # Format
-mypy src                        # Type check
+pyright src                     # Type check
 
 # Verification (CRITICAL - run before declaring done)
 make verify                     # Full verification suite
