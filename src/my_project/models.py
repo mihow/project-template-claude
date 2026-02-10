@@ -8,13 +8,13 @@ Add your domain models here.
 from __future__ import annotations
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 
-class Status(str, Enum):
+class Status(StrEnum):
     """Status enum for tracking item state."""
 
     PENDING = "pending"
