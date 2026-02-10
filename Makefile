@@ -30,45 +30,45 @@ help: ## Show this help message
 # =============================================================================
 
 install: ## Install production dependencies
-	uv pip install -e .
+	uv sync --no-dev
 
 install-dev: ## Install development dependencies
-	uv pip install -e ".[dev]"
+	uv sync --extra dev
 
 # =============================================================================
 # Testing
 # =============================================================================
 
 test: ## Run tests
-	pytest
+	uv run pytest
 
 test-cov: ## Run tests with coverage report (local)
-	pytest --cov=my_project --cov-report=html --cov-report=term
+	uv run pytest --cov=my_project --cov-report=html --cov-report=term
 
 test-ci: ## Run tests with coverage for CI (xml output)
-	pytest -v --cov=my_project --cov-report=xml --cov-report=term
+	uv run pytest -v --cov=my_project --cov-report=xml --cov-report=term
 
 test-fast: ## Run tests excluding slow tests
-	pytest -m "not slow"
+	uv run pytest -m "not slow"
 
 # =============================================================================
 # Code Quality
 # =============================================================================
 
 lint: ## Run linter (ruff check)
-	ruff check src tests
+	uv run ruff check src tests
 
 lint-fix: ## Run linter and fix issues
-	ruff check --fix src tests
+	uv run ruff check --fix src tests
 
 format: ## Format code with ruff
-	ruff format src tests
+	uv run ruff format src tests
 
 format-check: ## Check formatting without changes
-	ruff format --check src tests
+	uv run ruff format --check src tests
 
-typecheck: ## Run type checker (mypy)
-	mypy src
+typecheck: ## Run type checker (pyright)
+	uv run pyright src
 
 # =============================================================================
 # Combined Checks
@@ -85,14 +85,14 @@ ci: lint format-check typecheck test-cov ## Run CI pipeline locally
 # =============================================================================
 
 build: ## Build package
-	python -m build
+	uv run python -m build
 
 clean: ## Clean build artifacts
 	rm -rf build/
 	rm -rf dist/
 	rm -rf *.egg-info/
 	rm -rf .pytest_cache/
-	rm -rf .mypy_cache/
+	rm -rf .pyright/
 	rm -rf .ruff_cache/
 	rm -rf htmlcov/
 	rm -rf .coverage
@@ -122,7 +122,7 @@ docker-clean: ## Remove Docker containers and volumes
 # =============================================================================
 
 run: ## Run the CLI info command
-	my-project info
+	uv run my-project info
 
 setup: install-dev ## Full development setup
 	@echo "$(GREEN)Development environment ready!$(NC)"
@@ -134,17 +134,17 @@ setup: install-dev ## Full development setup
 
 verify: ## Run full verification suite (imports, tests, smoke, CLI)
 	@echo "$(BLUE)=== Level 1: Import Check ===$(NC)"
-	python -c "from my_project import *; print('$(GREEN)imports ok$(NC)')"
+	uv run python -c "from my_project import *; print('$(GREEN)imports ok$(NC)')"
 	@echo ""
 	@echo "$(BLUE)=== Level 2: Unit Tests ===$(NC)"
-	pytest -x -q
+	uv run pytest -x -q
 	@echo ""
 	@echo "$(BLUE)=== Level 3: Smoke Tests ===$(NC)"
-	pytest tests/test_smoke.py -v
+	uv run pytest tests/test_smoke.py -v
 	@echo ""
 	@echo "$(BLUE)=== Level 4: CLI Execution ===$(NC)"
-	python -m my_project.cli info
-	python -m my_project.cli run --name verify-test
+	uv run python -m my_project.cli info
+	uv run python -m my_project.cli run --name verify-test
 	@echo ""
 	@echo "$(GREEN)=== VERIFICATION PASSED ===$(NC)"
 

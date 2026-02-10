@@ -7,7 +7,7 @@
 # Jobs:
 #   - lint: Code quality checks (ruff)
 #   - test: Run test suite with coverage
-#   - typecheck: Static type checking (mypy)
+#   - typecheck: Static type checking (pyright)
 #   - build: Verify package builds correctly
 
 name: CI
@@ -20,7 +20,6 @@ on:
 
 env:
   PYTHON_VERSION: "3.12"
-  UV_SYSTEM_PYTHON: "1"  # Use system Python (from setup-python) instead of venv
 
 jobs:
   # ===========================================================================
@@ -108,7 +107,7 @@ jobs:
       - name: Install dependencies
         run: make install-dev
 
-      - name: Run mypy
+      - name: Run pyright
         run: make typecheck
 
   # ===========================================================================
@@ -133,16 +132,15 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Install build dependencies
-        run: uv pip install --system build
+      - name: Install dependencies
+        run: make install-dev
 
       - name: Build package
         run: make build
 
       - name: Verify package
         run: |
-          uv pip install --system dist/*.whl
-          my-project --version
+          uv run my-project --version
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
