@@ -1,7 +1,7 @@
 # Claude Code Best Practices Reference
 
 > Condensed from official docs at https://code.claude.com/docs/en/best-practices
-> Last updated: 2025-02-01
+> Last updated: 2026-02-10
 
 ## Core Principle
 
