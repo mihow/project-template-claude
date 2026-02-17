@@ -8,7 +8,7 @@
 #   make format     - Format code
 #   make all        - Run all checks (lint, typecheck, test)
 
-.PHONY: help install install-dev test test-cov lint format typecheck clean build docker-test docker-dev all
+.PHONY: help install install-dev test test-cov lint format typecheck clean build build-site docker-test docker-dev all
 
 # Default target
 .DEFAULT_GOAL := help
@@ -116,6 +116,18 @@ docker-build: ## Build production Docker image
 
 docker-clean: ## Remove Docker containers and volumes
 	docker compose down -v --remove-orphans
+
+# =============================================================================
+# Site / Preview
+# =============================================================================
+
+SITE_DIR ?= site
+
+build-site: ## Build static site artifacts (customize per project)
+	@mkdir -p $(SITE_DIR)
+	@echo '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Preview</title></head>' > $(SITE_DIR)/index.html
+	@echo '<body><h1>It works!</h1><p>Customize <code>make build-site</code> to build your project artifacts.</p></body></html>' >> $(SITE_DIR)/index.html
+	@echo "$(GREEN)Site built in $(SITE_DIR)/$(NC)"
 
 # =============================================================================
 # Development

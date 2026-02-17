@@ -29,6 +29,7 @@ make verify       # Full verification: imports, tests, smoke tests, CLI
 make lint         # Just linting
 make test         # Just tests
 make docker-build # Build Docker image
+make build-site   # Build static site artifacts (for PR previews)
 ```
 
 Run `make help` to see all available commands.

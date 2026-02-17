@@ -177,6 +177,42 @@ my-project info                 # Show app info
 my-project run --name example   # Run example
 ```
 
+## PR Previews
+
+Every pull request automatically gets a preview URL on GitHub Pages. This works for any static artifact your project produces — documentation, visualizations, reports, etc.
+
+### Setup (one-time)
+
+1. Go to **Settings → Pages** in your GitHub repository
+2. Set **Source** to "Deploy from a branch"
+3. Set **Branch** to `gh-pages` and folder to `/ (root)`
+4. Save
+
+The `gh-pages` branch is created automatically on the first deploy.
+
+### How it works
+
+- Push to `main` → deploys to the site root (`/`)
+- Pull requests → deploys to `/pr-{number}/` and posts a comment with the preview URL
+
+Both deploy paths use `keep_files: true`, so PR previews don't overwrite the main deploy or each other.
+
+### Customizing the build
+
+The workflow runs `make build-site`, which by default produces a placeholder page in `site/`. Replace the body of that target with your project's actual build:
+
+```makefile
+build-site:
+	uv run python -m my_project.export --output $(SITE_DIR)
+```
+
+The only contract is: output goes into `$(SITE_DIR)` (default: `site/`).
+
+### Notes
+
+- PR preview directories persist on `gh-pages` after merge/close. They don't auto-clean.
+- Both deploy jobs share a concurrency group to avoid conflicting pushes to `gh-pages`.
+
 ## Verification Philosophy
 
 **Code is not "done" until it's verified running.**
