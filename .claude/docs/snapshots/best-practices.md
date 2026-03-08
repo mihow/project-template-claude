@@ -119,7 +119,7 @@ Without clear success criteria, it might produce something that looks right but 
 
 | Strategy | Before | After |
 | --- | --- | --- |
-| **Provide verification criteria** | *”implement a function that validates email addresses"* | *"write a validateEmail function. example test cases: [[email protected]](/cdn-cgi/l/email-protection#c6b3b5a3b486a3bea7abb6aaa3e8a5a9ab) is true, invalid is false, [[email protected]](/cdn-cgi/l/email-protection#82f7f1e7f0c2ace1edef) is false. run the tests after implementing”* |
+| **Provide verification criteria** | *”implement a function that validates email addresses"* | *"write a validateEmail function. example test cases: [[email protected]](/cdn-cgi/l/email-protection#9beee8fee9dbfee3faf6ebf7feb5f8f4f6) is true, invalid is false, [[email protected]](/cdn-cgi/l/email-protection#9de8eef8efddb3fef2f0) is false. run the tests after implementing”* |
 | **Verify UI changes visually** | *”make the dashboard look better"* | *"[paste screenshot] implement this design. take a screenshot of the result and compare it to the original. list differences and fix them”* |
 | **Address root causes, not symptoms** | *”the build is failing"* | *"the build fails with this error: [paste error]. fix it and verify the build succeeds. address the root cause, don’t suppress the error”* |
 
