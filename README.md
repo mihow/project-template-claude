@@ -136,6 +136,28 @@ Specialized subagents for isolated tasks:
 
 - `security-reviewer` - Security vulnerability analysis
 - `test-writer` - Comprehensive test generation
+- `fleet-worker` - Narrow, evidence-gated worker for orchestrated fan-out
+- `adversarial-reviewer` - Independently refutes a worker's result against the spec
+
+### Multi-Agent Orchestration (Sonnet Fleet)
+
+For large, parallelizable work, the `sonnet-fleet` skill coordinates a team of cheaper
+Sonnet workers under a strong (Opus) orchestrator, with verification built into the
+structure. It follows the orchestrator-worker pattern Anthropic published for their
+multi-agent research system, and exists to compensate for where cheaper workers fail —
+premature "done" claims, dropped requirements, self-referential verification — through
+eight guardrails.
+
+- `/sonnet-fleet` - Orchestrate a goal across parallel workers (audits, research sweeps,
+  bounded implementation plans, unknown-size discovery)
+- Reusable Workflow-tool templates: `.claude/skills/sonnet-fleet/templates/`
+- Canonical schemas and worker preamble: `.claude/skills/sonnet-fleet/SCHEMAS.md`
+- Reliability guardrails: `.claude/rules/subagents.md`
+- Design and rationale: `.claude/docs/sonnet-fleet-harness.md`
+- Research behind it: `.claude/research/`
+
+Use it only for work that is parallelizable, high-value, and externally verifiable.
+Sequential or low-value tasks are cheaper and more reliable as a single agent.
 
 ### MCP Servers
 
