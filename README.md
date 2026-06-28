@@ -297,7 +297,7 @@ After creating a repository from this template:
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+GNU General Public License v3.0 or later - see [LICENSE](LICENSE) for details.
 
 ---
 

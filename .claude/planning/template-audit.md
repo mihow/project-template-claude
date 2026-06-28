@@ -41,7 +41,7 @@ that inflate every clone without adding value.
 
 | # | Issue | Location | Severity | Fix | Type |
 |---|-------|----------|----------|-----|------|
-| 1 | License mismatch: `pyproject.toml` declares MIT (both `license` field and classifier) but `LICENSE` is GPL v3. Any published package would carry incorrect SPDX metadata. | `pyproject.toml` lines 6+, `LICENSE` | High | Decide the real license and make both files agree. **Requires a maintainer decision — do not auto-change.** | Correctness |
+| 1 | License mismatch: `pyproject.toml` declared MIT (both `license` field and classifier) but `LICENSE` is GPL v3. Any published package would have carried incorrect SPDX metadata. | `pyproject.toml`, `LICENSE`, `README.md` | High | **Resolved in this branch:** set `pyproject.toml` license + classifier and the README to GPL-3.0-or-later to match the `LICENSE` file, per maintainer decision. | Correctness |
 | 2 | Three skills hardcode the package name `my_project` / `my-project` (`verify/SKILL.md`, `tdd/SKILL.md`, `fix-issue/SKILL.md`), so they silently break for any project that follows the documented rename procedure. | `.claude/skills/verify/SKILL.md`, `tdd/SKILL.md`, `fix-issue/SKILL.md` | Medium | Parameterize via `$ARGUMENTS` or a documented `{{package_name}}` placeholder; alternatively, add an explicit note to the rename checklist. | Correctness |
 | 3 | `Makefile` `test-cov` and `test-ci` targets hardcode `--cov=my_project`; after rename, coverage silently reports 0% on the actual package. | `Makefile` (test-cov, test-ci targets) | Medium | Derive the package name from the directory under `src/`, or add this edit to the rename checklist alongside the other `my_project` replacements. | Correctness |
 | 4 | `configs/skills/README.md` documents an old `skill.yaml` format that does not match the actual `SKILL.md` frontmatter convention used by every skill in this repo. A user following the README will write a broken skill. | `configs/skills/README.md` | Medium | Rewrite to document the `SKILL.md` frontmatter format (name, description, tools, trigger, disable-model-invocation, paths) with a minimal working example. | Docs |
@@ -66,4 +66,4 @@ that inflate every clone without adding value.
 
 5. **Enhancement track (items 8, 9):** Add the `permissions.allow` list and hook configuration to `settings.json`, and validate the new `sonnet-fleet` skill against the existing skill conventions. These can proceed in parallel with the clutter cleanup once the correctness issues are addressed.
 
-> Items 2, 3, 4, 5, 6, 7, 10 are safe automated edits. Item 1 (license) and item 8 (permissions policy) require a maintainer decision before implementation.
+> Item 1 (license) is resolved in this branch (GPL-3.0-or-later, per maintainer decision). Items 2, 3, 4, 5, 6, 7, 10 are safe automated edits. Item 8 (permissions policy) still benefits from a maintainer decision before implementation.

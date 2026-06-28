@@ -3,7 +3,7 @@ name = "my-project"  # TODO: Change to your project name
 version = "0.1.0"
 description = "A Claude-first Python project"  # TODO: Update description
 readme = "README.md"
-license = { text = "MIT" }
+license = { text = "GPL-3.0-or-later" }
 requires-python = ">=3.12"
 authors = [
     { name = "Your Name", email = "you@example.com" },  # TODO: Update author
@@ -12,7 +12,7 @@ keywords = ["claude", "ai", "template"]  # TODO: Update keywords
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
 ]
