@@ -129,6 +129,7 @@ Reusable workflows invoked with `/skill-name`:
 - `/fix-issue 123` - Fix a GitHub issue from start to PR
 - `/tdd` - Test-driven development workflow
 - `/review` - Code review checklist
+- `/analyze-sessions` - Study an agent's behavior from your own Claude Code session logs
 
 ### Agents (`.claude/agents/`)
 
@@ -158,6 +159,16 @@ eight guardrails.
 
 Use it only for work that is parallelizable, high-value, and externally verifiable.
 Sequential or low-value tasks are cheaper and more reliable as a single agent.
+
+### Studying agent behavior
+
+Claude Code records every session as a transcript tagged with the model that produced each turn.
+The `analyze-sessions` skill turns those logs into findings — quantify cheap signals first (tool
+use, message length, test-run frequency, completion claims, errors), then fan out a qualitative
+pass with `sonnet-fleet`. Transferable, model-agnostic learnings from doing this are in
+`.claude/docs/analyzing-agent-behavior.md` (the short version: agents are highly steerable, so a
+strong `CLAUDE.md` suppresses most failure modes; prose/comment over-generation and weak
+version-control-state handling are the tendencies that resist instructions and need targeting).
 
 ### MCP Servers
 
