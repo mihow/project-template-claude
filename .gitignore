@@ -217,6 +217,8 @@ data/
 
 # Claude Code local files (personal, not shared)
 CLAUDE.local.md
+.claude/settings.local.json
+.claude/agent-memory-local/
 *.local.md
 
 # IDE
@@ -229,3 +231,6 @@ CLAUDE.local.md
 .DS_Store
 Thumbs.db
 butterfly-planner/
+
+# Static site build output (make build-site)
+site/
