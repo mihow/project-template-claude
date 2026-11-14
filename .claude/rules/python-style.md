@@ -23,7 +23,7 @@ from typing import List, Dict, Optional
 
 - Use absolute imports from package root
 - Group: stdlib, third-party, local (separated by blank lines)
-- Use `from x import y` for specific items
+- Use `from x import y` for specific items, except typing-only names: use `typing.Sequence`, not `from typing import Sequence`
 
 ## Error Handling
 

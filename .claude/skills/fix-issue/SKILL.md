@@ -1,41 +1,17 @@
 ---
 name: fix-issue
-description: Fix a GitHub issue from start to PR
+description: Fix a GitHub issue from investigation to pull request
+argument-hint: "[issue-number]"
 disable-model-invocation: true
 ---
 
-Fix GitHub issue: $ARGUMENTS
+Fix GitHub issue $ARGUMENTS.
 
-## Workflow
+1. **Understand**: `gh issue view $ARGUMENTS --comments`. If the issue is ambiguous, ask before writing code.
+2. **Reproduce**: write a failing test that shows the bug, or run the command that triggers it. Do not fix what you have not reproduced.
+3. **Fix**: address the root cause and follow the patterns already in the code.
+4. **Verify**: `make ci`, then `make verify`, then run the exact scenario from the issue and confirm the output is now correct.
+5. **Commit**: on a branch, staging files by path, with a Conventional Commit message that references the issue (`fix: ... (#$ARGUMENTS)`).
+6. **Pull request**: push and `gh pr create`. In the description say what caused the bug, what changed and what you ran to verify it. Put any long generated detail inside a `<details>` block so the summary stays readable.
 
-1. **Understand**: Use `gh issue view $ARGUMENTS` to get details
-2. **Investigate**: Search codebase for relevant files
-3. **Plan**: Identify changes needed
-4. **Implement**: Make the changes
-5. **Test**: Write/run tests to verify the fix
-6. **VERIFY** (Required):
-   ```bash
-   # Must pass ALL of these before continuing:
-   python -c "from my_project import *; print('imports ok')"
-   pytest -x
-   pytest tests/test_smoke.py -v  # Smoke tests
-   my-project info  # CLI actually runs
-   ```
-7. **Lint**: Run linter and type checker
-8. **Commit**: Create descriptive commit message
-9. **PR**: Push and create pull request with `gh pr create`
-
-## IMPORTANT: Verification
-
-Do NOT proceed to commit/PR until you have:
-- [ ] Run the code you changed (not just tests)
-- [ ] Verified output is correct
-- [ ] Checked for errors/warnings in output
-
-Tests passing is necessary but NOT sufficient. Actually run the code.
-
-## Guidelines
-
-- Address root cause, not just symptoms
-- Follow existing code patterns
-- Include test coverage for the fix
+Stop and report instead of opening a pull request if step 2 or step 4 did not succeed.
