@@ -3,7 +3,8 @@ name = "my-project"  # TODO: Change to your project name
 version = "0.1.0"
 description = "A Claude-first Python project"  # TODO: Update description
 readme = "README.md"
-license = { text = "MIT" }
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
 requires-python = ">=3.12"
 authors = [
     { name = "Your Name", email = "you@example.com" },  # TODO: Update author
@@ -12,7 +13,6 @@ keywords = ["claude", "ai", "template"]  # TODO: Update keywords
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
 ]
@@ -23,7 +23,9 @@ dependencies = [
     "pyyaml>=6.0",
 ]
 
-[project.optional-dependencies]
+# Dev dependencies are a dependency group, so plain `uv sync` installs them
+# and `uv sync --no-dev` leaves them out.
+[dependency-groups]
 dev = [
     "pytest>=8.0.0",
     "pytest-cov>=4.0.0",
@@ -122,7 +124,7 @@ select = [
     "UP",     # pyupgrade
     "ARG",    # flake8-unused-arguments
     "SIM",    # flake8-simplify
-    "TCH",    # flake8-type-checking
+    "TC",     # flake8-type-checking
     "PTH",    # flake8-use-pathlib
     "ERA",    # eradicate (commented-out code)
     "PL",     # Pylint
