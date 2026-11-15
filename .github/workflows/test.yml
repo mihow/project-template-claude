@@ -9,6 +9,7 @@
 #   - test: Run test suite with coverage
 #   - typecheck: Static type checking (pyright)
 #   - build: Verify package builds correctly
+#   - docker: Build the production image from uv.lock
 
 name: CI
 
@@ -17,6 +18,13 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   PYTHON_VERSION: "3.12"
@@ -31,17 +39,13 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
+        uses: actions/checkout@v7
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v10.3.3
         with:
           enable-cache: true
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install dependencies
         run: make install-dev
@@ -58,17 +62,13 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
+        uses: actions/checkout@v7
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v10.3.3
         with:
           enable-cache: true
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install dependencies
         run: make install-dev
@@ -77,9 +77,10 @@ jobs:
         run: make test-ci
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v7
         with:
           files: ./coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
           verbose: true
 
@@ -92,17 +93,13 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
+        uses: actions/checkout@v7
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v10.3.3
         with:
           enable-cache: true
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install dependencies
         run: make install-dev
@@ -120,17 +117,13 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
+        uses: actions/checkout@v7
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v10.3.3
         with:
           enable-cache: true
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install dependencies
         run: make install-dev
@@ -143,29 +136,37 @@ jobs:
           uv run my-project --version
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist/
 
   # ===========================================================================
-  # Docker Build (optional, runs only on main)
+  # Docker Build: runs the tests inside the image, then builds production
   # ===========================================================================
   docker:
     name: Docker Build
     runs-on: ubuntu-latest
     needs: [lint, test]
-    if: github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
-      - name: Build Docker image
-        uses: docker/build-push-action@v5
+      - name: Run tests in Docker (test stage)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          target: test
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build production image
+        uses: docker/build-push-action@v7
         with:
           context: .
           target: production

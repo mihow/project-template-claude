@@ -1,58 +1,25 @@
 ---
 name: verify
-description: Verify code actually works (run this before declaring done)
-disable-model-invocation: true
+description: Verify that a change actually works by running it. Use before reporting a code change as done.
 ---
 
-# Verification Checklist
+# Verify
 
-Run this skill before declaring any task complete.
-
-## Commands to Run
+Run these and read the output. Do not report a step as passing unless you saw it pass.
 
 ```bash
-# Level 1: Imports
-python -c "from my_project import *; print('imports ok')"
-
-# Level 2: Unit tests
-pytest -x
-
-# Level 3: Smoke tests (actually run the code)
-pytest tests/test_smoke.py -v
-
-# Level 4: CLI execution
-my-project info
-my-project run --name verify-test
-
-# Level 5: Lint and type check
-ruff check src tests
-pyright src
+make ci       # lint, format check, typecheck, tests with coverage
+make verify   # imports, tests, smoke tests, real CLI invocations
 ```
 
-## MCP Server Verification
+Then run the specific code path you changed, with real input, and check the output is correct and free of warnings. `make verify` only covers `info` and `run`; a new command or option needs its own invocation, for example `uv run my-project --debug run --name test`.
 
-```bash
-# Chrome DevTools MCP
-npx @anthropic/mcp-server-chrome-devtools --version 2>/dev/null && echo "OK" || echo "NOT INSTALLED"
+If you changed something other than Python code, verify that thing instead: see "Verify what you change" in `AGENTS.md`.
 
-# Python LSP
-which pylsp && pylsp --version 2>/dev/null && echo "OK" || echo "NOT INSTALLED"
-```
+## Not verified
 
-## What "Done" Means
+- Tests were written but the code was not run outside them
+- The code was read but not run
+- A command exited 0 but its output was not checked
 
-- [ ] All imports work (no ImportError)
-- [ ] Unit tests pass (pytest -x)
-- [ ] Smoke tests pass (tests/test_smoke.py)
-- [ ] CLI commands execute successfully
-- [ ] No lint errors (ruff check)
-- [ ] Type check passes (pyright)
-- [ ] Actually ran the code path that changed
-- [ ] Verified output is correct
-
-## NOT Done If
-
-- Only wrote tests (tests can fake success)
-- Only read the code (reading != running)
-- Assumed it works (verify, don't assume)
-- Got "no errors" but didn't check output
+Report what you ran and what you saw. If a step failed or was skipped, say so.

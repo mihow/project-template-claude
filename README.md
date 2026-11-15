@@ -1,271 +1,205 @@
 # Claude-First Python Template
 
-A GitHub template for building Python projects with Claude Code as a first-class development partner.
+A GitHub template for Python projects developed with Claude Code and other coding agents.
 
-## Features
+## What you get
 
-- **Claude-First Development**: Pre-configured `.claude/` directory with CLAUDE.md, rules, skills, and agents
-- **Modern Python**: Python 3.12+ with type hints, Pydantic, pytest
-- **uv Package Management**: Fast, reliable dependency management
-- **Test-Driven Development**: pytest setup with fixtures, markers, and coverage
-- **Docker Support**: Multi-stage Dockerfile and docker-compose for development
-- **CI/CD**: GitHub Actions workflow for lint, test, typecheck, and build
-- **MCP Servers**: Pre-configured chrome-devtools and Python language server
+- **Agent instructions**: a short `AGENTS.md` that any coding agent can read, imported by `CLAUDE.md`
+- **Claude Code config**: permissions, hooks, skills, one subagent and path-scoped rules in `.claude/`
+- **Enforced verification**: a Stop hook runs `make ci` before Claude finishes while code changes are uncommitted or unpushed
+- **Cloud sessions**: a SessionStart hook installs dependencies in Claude Code on the web
+- **Claude in GitHub**: `@claude` mentions and opt-in pull request review
+- **Python tooling**: Python 3.12+, uv, ruff, pyright, pytest with coverage
+- **Docker**: multi-stage build from `uv.lock`
+- **CI**: lint, typecheck, test, package build, Docker build, and PR previews on GitHub Pages
 
-## Quick Start
+## Quick start
 
-### Use This Template
+1. Click **Use this template** on GitHub and clone your new repository.
+2. Rename the project:
 
-1. Click **"Use this template"** on GitHub
-2. Clone your new repository
-3. Customize `pyproject.toml` (project name, description, author)
-4. Rename `src/my_project/` to your package name
-5. Update imports in tests and `.claude/CLAUDE.md`
+   ```bash
+   make init NAME=my-new-project
+   ```
 
-### Local Setup
+   This replaces `my-project` / `my_project` everywhere, renames `src/my_project/` and refreshes `uv.lock`. Run `python3 scripts/init_project.py --help` for the author, email, GitHub user and description options.
+3. Install and check:
 
-```bash
-# Install uv (if not installed)
-curl -LsSf https://astral.sh/uv/install.sh | sh
+   ```bash
+   make install-dev
+   make ci
+   make verify
+   ```
 
-# Create virtual environment and install
-uv venv
-source .venv/bin/activate  # or `.venv\Scripts\activate` on Windows
-uv pip install -e ".[dev]"
+4. Start working:
 
-# Run tests
-pytest
+   ```bash
+   claude
+   ```
 
-# Run linting
-ruff check src tests
+uv is required: `curl -LsSf https://astral.sh/uv/install.sh | sh`.
 
-# Start development
-claude  # Opens Claude Code
-```
-
-### Docker Setup
+## Commands
 
 ```bash
-# Run tests in container
-docker compose run --rm test
-
-# Development shell
-docker compose run --rm dev
-
-# Build production image
-docker build -t my-project --target production .
+make install-dev   # Install runtime and dev dependencies (uv sync)
+make ci            # Lint, format check, typecheck, tests with coverage
+make verify        # Imports, tests, smoke tests, real CLI run
+make test          # Tests only
+make format        # Format with ruff
+make hooks         # Install pre-commit git hooks
+make docker-build  # Build the production image
+make build-site    # Build static site artifacts for PR previews
+make help          # Everything else
 ```
 
-## Project Structure
+Tools are installed in `.venv`. Run them through `make` or `uv run`, for example `uv run pytest tests/test_core.py -x` or `uv run my-project info`.
+
+## Project structure
 
 ```
 .
-├── .claude/                    # Claude Code configuration
-│   ├── CLAUDE.md              # Main project instructions
-│   ├── settings.json          # MCP servers & permissions
-│   ├── rules/                 # Modular coding rules
-│   │   ├── python-style.md    # Python conventions
-│   │   ├── testing.md         # Test guidelines
-│   │   └── docker.md          # Docker best practices
-│   ├── skills/                # Reusable Claude skills
-│   │   ├── fix-issue/         # Fix GitHub issues
-│   │   ├── tdd/               # Test-driven development
-│   │   └── review/            # Code review checklist
-│   ├── agents/                # Specialized subagents
-│   │   ├── security-reviewer.md
-│   │   └── test-writer.md
-│   └── configs/               # Tool configurations
-│       └── mcp/               # MCP server setup
-├── .github/workflows/         # CI/CD pipelines
-│   └── test.yml              # Lint, test, build workflow
-├── src/my_project/            # Main package
-│   ├── __init__.py
-│   ├── cli.py                # Command-line interface
-│   ├── config.py             # Configuration management
-│   ├── core.py               # Business logic
-│   └── models.py             # Pydantic data models
-├── tests/                     # Test suite
-│   ├── conftest.py           # Shared fixtures
-│   ├── test_config.py
-│   ├── test_core.py
-│   └── test_models.py
-├── Dockerfile                 # Multi-stage Docker build
-├── docker-compose.yml         # Development services
-├── pyproject.toml             # Project configuration
-├── Makefile                   # Common commands
-└── README.md                  # This file
+├── AGENTS.md                  # Instructions for any coding agent
+├── CLAUDE.md                  # Imports AGENTS.md, adds Claude Code specifics
+├── .claude/
+│   ├── settings.json          # Permissions and hooks
+│   ├── hooks/                 # session-start.sh, format.sh, stop-check.sh
+│   ├── rules/                 # Path-scoped rules (python-style, testing, docker)
+│   ├── skills/                # /tdd, /fix-issue, /verify
+│   └── agents/                # test-writer
+├── .github/workflows/
+│   ├── test.yml               # CI
+│   ├── claude.yml             # @claude mentions and PR review
+│   └── pages-preview.yml      # GitHub Pages deploy and PR previews
+├── docs/claude/prompts/       # Prompts for scheduled sessions
+├── scripts/init_project.py    # One-time rename
+├── src/my_project/            # Package: cli, config, core, models
+├── tests/                     # Unit and smoke tests
+├── Dockerfile, docker-compose.yml
+├── Makefile
+└── pyproject.toml
 ```
 
-## Claude Code Integration
+## How the Claude setup works
 
-### CLAUDE.md
+### Instructions
 
-The `.claude/CLAUDE.md` file is loaded at the start of every Claude Code session. It contains:
-- Project overview and key commands
-- Code style guidelines
-- Project structure reference
-- Learnings and gotchas
+`AGENTS.md` holds the project instructions: commands, how to verify a change, conventions and gotchas. `CLAUDE.md` imports it with `@AGENTS.md` and adds a few lines that only apply to Claude Code. Other agents that read `AGENTS.md` get the same instructions.
 
-Keep it concise - only include things Claude can't infer from code.
+Both files are loaded on every task, so keep them short. Add a line when you have corrected the same thing twice, and delete lines that the code already makes obvious. Instructions that apply to one part of the tree go in `.claude/rules/` with a `paths:` frontmatter, where they load only when matching files are read.
 
-### Rules (`.claude/rules/`)
+### Permissions
 
-Modular, topic-specific instructions that apply to matching files:
+`.claude/settings.json` allows `make`, `uv run`, `uv sync`, `uv lock` and read-only `git` and `gh` commands without a prompt, and denies reading `.env`. Personal overrides go in `.claude/settings.local.json`, which is git-ignored.
 
-```markdown
----
-paths:
-  - "src/**/*.py"
----
-# Python Style Rules
-- Use modern type hints (list[str], X | None)
-- Follow project conventions
-```
+### Hooks
 
-### Skills (`.claude/skills/`)
+| Hook | Script | What it does |
+|------|--------|--------------|
+| SessionStart | `.claude/hooks/session-start.sh` | In cloud sessions, runs `uv sync` when `pyproject.toml` or `uv.lock` changed. Does nothing locally. |
+| PostToolUse (Edit, Write) | `.claude/hooks/format.sh` | Formats the edited Python file with ruff. |
+| Stop | `.claude/hooks/stop-check.sh` | If Python files, `pyproject.toml` or `uv.lock` have uncommitted changes or are in commits not yet on the upstream branch, runs `make ci`. On failure Claude gets the output and keeps working. |
 
-Reusable workflows invoked with `/skill-name`:
+The Stop hook blocks once per turn. If `make ci` still fails after Claude's second attempt, Claude stops and reports the failure. It looks at the working tree, not at who changed it: if your tree already has failing changes, Claude is asked to fix them once. After a push the hook has nothing to check, and CI takes over.
 
-- `/fix-issue 123` - Fix a GitHub issue from start to PR
-- `/tdd` - Test-driven development workflow
-- `/review` - Code review checklist
+### Skills and agents
 
-### Agents (`.claude/agents/`)
+- `/tdd <description>`: red, green, refactor, then run the real code path
+- `/fix-issue <number>`: reproduce, fix, verify, open a pull request
+- `/verify`: `make ci`, `make verify`, then the changed code path. Claude can also invoke this itself.
+- `test-writer` agent: writes tests for existing code and runs them
 
-Specialized subagents for isolated tasks:
+For code review and security review use Claude Code's built-in `/code-review` and `/security-review`.
 
-- `security-reviewer` - Security vulnerability analysis
-- `test-writer` - Comprehensive test generation
+### Code intelligence (optional)
 
-### MCP Servers
-
-Pre-configured in `.claude/settings.json`:
-
-- **chrome-devtools**: Headless browser for UI testing
-- **pylsp**: Python language server for code intelligence
-
-Install dependencies:
-```bash
-npm install -g @anthropic/mcp-server-chrome-devtools
-uv pip install python-lsp-server[all]
-```
-
-## Development Commands
+The pyright language server plugin lets Claude jump to definitions and find references instead of searching. It is not enabled by the template. To use it locally, put `pyright-langserver` on your PATH and install the plugin inside Claude Code:
 
 ```bash
-# Tests
-pytest                          # Run all tests
-pytest --cov=my_project         # With coverage
-pytest -m "not slow"            # Skip slow tests
+uv tool install pyright
+```
 
-# Code Quality
-ruff check src tests            # Lint
-ruff format src tests           # Format
-pyright src                     # Type check
+```
+/plugin install pyright-lsp@claude-plugins-official
+```
 
-# Verification (CRITICAL - run before declaring done)
-make verify                     # Full verification suite
-make verify-mcp                 # Check MCP servers installed
+### MCP servers
 
-# Docker
-docker compose run --rm test    # Tests in container
-docker compose run --rm lint    # Lint in container
+None are configured: this template's verification runs through the CLI, and every connected server adds to the context of every session. If your project needs one, add it with `claude mcp add --scope project ...`, which writes a `.mcp.json` at the repository root.
+
+### Claude in GitHub
+
+`.github/workflows/claude.yml` has two jobs:
+
+- **Mentions**: write `@claude` in an issue, pull request comment or review comment and Claude responds, with the project installed so it can run `make ci`.
+- **Review**: Claude reviews each pull request. This is off until you add the repository variable `CLAUDE_REVIEW` with the value `true`.
+
+Both need one repository secret: `ANTHROPIC_API_KEY`, or `CLAUDE_CODE_OAUTH_TOKEN` from `claude setup-token`. Running `/install-github-app` inside Claude Code sets this up.
+
+### Keeping the template current
+
+`docs/claude/prompts/template-scout.md` is a prompt for a scheduled Claude Code session. It reads the current Claude Code docs and changelog, compares them with this repository and opens one pull request with verified changes, or does nothing. Schedule it monthly if you maintain a fork of this template.
+
+## Verification
+
+Code is not done until it has been run.
+
+1. Unit tests are necessary but not sufficient: they prove the code satisfies the tests.
+2. `tests/test_smoke.py` runs the installed CLI as a subprocess.
+3. `make verify` runs imports, tests, smoke tests and the CLI.
+4. The Stop hook runs `make ci` whenever code changes are uncommitted or unpushed, so Claude sees failures before it reports back.
+
+See "Verify what you change" in `AGENTS.md` for what to run for each kind of change.
+
+## Docker
+
+```bash
+docker compose run --rm test    # Tests in a container
 docker compose run --rm dev     # Development shell
-
-# CLI
-my-project info                 # Show app info
-my-project run --name example   # Run example
+make docker-build               # Production image
 ```
 
-## PR Previews
+Images install from `uv.lock` with a pinned uv version, so they match local installs.
 
-Every pull request automatically gets a preview URL on GitHub Pages. This works for any static artifact your project produces — documentation, visualizations, reports, etc.
+## PR previews
+
+Every pull request from a branch in this repository gets a preview URL on GitHub Pages. This works for any static artifact your project produces: documentation, visualizations, reports.
 
 ### Setup (one-time)
 
 1. Go to **Settings → Pages** in your GitHub repository
 2. Set **Source** to "Deploy from a branch"
 3. Set **Branch** to `gh-pages` and folder to `/ (root)`
-4. Save
 
-The `gh-pages` branch is created automatically on the first deploy.
+The `gh-pages` branch is created by the first deploy.
 
 ### How it works
 
-- Push to `main` → deploys to the site root (`/`)
-- Pull requests → deploys to `/pr-{number}/` and posts a comment with the preview URL
-
-Both deploy paths use `keep_files: true`, so PR previews don't overwrite the main deploy or each other.
+- Push to `main` deploys to the site root
+- A pull request deploys to `/pr-{number}/` and gets a comment with the URL
+- Closing or merging the pull request removes `/pr-{number}/`
 
 ### Customizing the build
 
-The workflow runs `make build-site`, which by default produces a placeholder page in `site/`. Replace the body of that target with your project's actual build:
+The workflow runs `make build-site`, which by default writes a placeholder page to `site/`. Replace the body of that target with your project's build:
 
 ```makefile
 build-site:
 	uv run python -m my_project.export --output $(SITE_DIR)
 ```
 
-The only contract is: output goes into `$(SITE_DIR)` (default: `site/`).
+The only contract is that output goes into `$(SITE_DIR)`.
 
-### Notes
+## After creating your repository
 
-- PR preview directories persist on `gh-pages` after merge/close. They don't auto-clean.
-- Both deploy jobs share a concurrency group to avoid conflicting pushes to `gh-pages`.
-
-## Verification Philosophy
-
-**Code is not "done" until it's verified running.**
-
-This template enforces a verification-first approach:
-
-1. **Unit tests are necessary but not sufficient** - Tests can be written to pass
-2. **Smoke tests verify real execution** - `tests/test_smoke.py` actually runs the CLI
-3. **`make verify` runs full suite** - Imports, tests, smoke tests, CLI execution
-4. **MCP servers must be verified** - `make verify-mcp` checks they're actually installed
-
-See `.claude/rules/verification.md` for the complete verification checklist.
-
-## Customization Checklist
-
-After creating a repository from this template:
-
-- [ ] Update `pyproject.toml`:
-  - [ ] Change `name` from "my-project"
-  - [ ] Update `description`
-  - [ ] Update `authors`
-  - [ ] Update `project.urls`
-  - [ ] Add/remove dependencies
-- [ ] Rename `src/my_project/` to your package name
-- [ ] Update imports in all Python files
-- [ ] Update `.claude/CLAUDE.md` with project-specific info
-- [ ] Update `.claude/rules/` if needed
-- [ ] Configure MCP servers in `.claude/settings.json`
+- [ ] `make init NAME=...`, then delete `scripts/init_project.py` and the `init` Makefile target
+- [ ] Fill in the remaining `TODO` fields in `pyproject.toml`
+- [ ] Rewrite the first lines of `AGENTS.md` to describe your project
+- [ ] Choose a license. The template is GPL-3.0-or-later; change `LICENSE` and `pyproject.toml` if you need another.
+- [ ] Add the Claude secret if you want `@claude` in GitHub, and `CODECOV_TOKEN` if you use Codecov
+- [ ] Replace the example code in `src/` and `tests/`
 - [ ] Update this README
-- [ ] Delete example code and write your own
-
-## Best Practices
-
-### For Claude Code
-
-1. **Keep CLAUDE.md concise** - Only include what Claude can't infer from code
-2. **Use rules for details** - Put specific guidelines in `.claude/rules/`
-3. **Create skills for workflows** - Repeatable tasks become `/skill-name`
-4. **Delegate to subagents** - Use agents for isolated, focused tasks
-5. **Add learnings** - Document gotchas as you discover them
-
-### For Development
-
-1. **Write tests first** - Use `/tdd` skill for TDD workflow
-2. **Commit often** - Small, focused commits
-3. **Use type hints** - Modern Python 3.10+ style
-4. **Run linters** - `ruff check` before committing
-5. **Verify in Docker** - `docker compose run --rm test`
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
-
----
-
-Built with Claude Code
+GPL-3.0-or-later. See [LICENSE](LICENSE).

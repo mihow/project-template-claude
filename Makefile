@@ -8,7 +8,7 @@
 #   make format     - Format code
 #   make all        - Run all checks (lint, typecheck, test)
 
-.PHONY: help install install-dev test test-cov lint format typecheck clean build build-site docker-test docker-dev all
+.PHONY: help init install install-dev test test-cov test-ci test-fast lint lint-fix format format-check typecheck all check ci build clean build-site docker-test docker-lint docker-dev docker-build docker-clean run setup verify hooks
 
 # Default target
 .DEFAULT_GOAL := help
@@ -26,14 +26,25 @@ help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(YELLOW)%-15s$(NC) %s\n", $$1, $$2}'
 
 # =============================================================================
+# Project setup
+# =============================================================================
+
+init: ## Rename the template: make init NAME=my-new-project
+	@test -n "$(NAME)" || (echo "usage: make init NAME=my-new-project" && exit 1)
+	python3 scripts/init_project.py "$(NAME)"
+
+hooks: ## Install pre-commit git hooks
+	uv run pre-commit install
+
+# =============================================================================
 # Installation
 # =============================================================================
 
 install: ## Install production dependencies
 	uv sync --no-dev
 
-install-dev: ## Install development dependencies
-	uv sync --extra dev
+install-dev: ## Install runtime and development dependencies
+	uv sync
 
 # =============================================================================
 # Testing
@@ -155,23 +166,7 @@ verify: ## Run full verification suite (imports, tests, smoke, CLI)
 	uv run pytest tests/test_smoke.py -v
 	@echo ""
 	@echo "$(BLUE)=== Level 4: CLI Execution ===$(NC)"
-	uv run python -m my_project.cli info
-	uv run python -m my_project.cli run --name verify-test
+	uv run my-project info
+	uv run my-project run --name verify-test
 	@echo ""
 	@echo "$(GREEN)=== VERIFICATION PASSED ===$(NC)"
-
-verify-mcp: ## Verify MCP servers are installed and working
-	@echo "$(BLUE)Checking Chrome DevTools MCP...$(NC)"
-	@npx @anthropic/mcp-server-chrome-devtools --help >/dev/null 2>&1 && echo "$(GREEN)chrome-devtools: OK$(NC)" || echo "$(YELLOW)chrome-devtools: NOT INSTALLED (run: npm install -g @anthropic/mcp-server-chrome-devtools)$(NC)"
-	@echo ""
-	@echo "$(BLUE)Checking Python LSP...$(NC)"
-	@which pylsp >/dev/null 2>&1 && echo "$(GREEN)pylsp: OK ($(shell which pylsp))$(NC)" || echo "$(YELLOW)pylsp: NOT INSTALLED (run: uv pip install python-lsp-server[all])$(NC)"
-
-# =============================================================================
-# MCP Servers
-# =============================================================================
-
-mcp-install: ## Install MCP server dependencies
-	npm install -g @anthropic/mcp-server-chrome-devtools
-	uv pip install python-lsp-server[all]
-	@echo "$(GREEN)MCP servers installed$(NC)"

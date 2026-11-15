@@ -1,53 +1,16 @@
 ---
 name: tdd
-description: Test-driven development workflow
+description: Test-driven development workflow. Use when implementing a new feature or fixing a bug test-first.
+argument-hint: "[feature or bug description]"
 ---
 
-# Test-Driven Development
+# Test-driven development
 
-Use this skill when implementing new features or fixing bugs.
+Task: $ARGUMENTS
 
-## Red-Green-Refactor Cycle
+1. **Red**: write a test that describes the behavior. Run it with `uv run pytest tests/test_<module>.py -x` and confirm it fails for the expected reason. A test that fails on an import error has not shown anything yet.
+2. **Green**: write the smallest change that makes it pass. Run the same command.
+3. **Refactor**: clean up with the tests still passing.
+4. **Verify**: run `make ci`, then run the real code path outside the tests (`uv run my-project ...` or `make verify`) and check the output.
 
-1. **Red**: Write a failing test that defines the expected behavior
-2. **Green**: Write minimal code to make the test pass
-3. **Refactor**: Clean up while keeping tests green
-4. **VERIFY**: Actually run the code (not just tests)
-
-## Verification Checklist
-
-After Green phase, ALWAYS:
-```bash
-# 1. Tests pass
-pytest -x
-
-# 2. Imports work
-python -c "from my_project import *; print('ok')"
-
-# 3. Actually run the code path you changed
-my-project info  # or relevant command
-
-# 4. Smoke tests pass
-pytest tests/test_smoke.py -v
-```
-
-## CRITICAL
-
-Unit tests can be written to pass. They prove you wrote code that satisfies your test, NOT that the code actually works.
-
-After implementing, you MUST:
-- Run the actual code path (not through tests)
-- Verify the output is correct
-- Check for warnings/errors
-
-## Example Usage
-
-```
-/tdd Add a function to validate email addresses
-```
-
-Then:
-1. Write test for valid email → RED (fails)
-2. Implement validation → GREEN (passes)
-3. Refactor if needed
-4. **VERIFY**: Run actual validation with real inputs
+A unit test proves the code satisfies the test, not that the feature works. Step 4 is not optional.

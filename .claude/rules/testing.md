@@ -32,3 +32,4 @@ Use pytest markers for categorization:
 - One assertion concept per test (multiple asserts OK if related)
 - Use `tmp_path` for file operations
 - Clear caches: `get_settings.cache_clear()`
+- Run one file with `uv run pytest tests/test_<module>.py -x`
