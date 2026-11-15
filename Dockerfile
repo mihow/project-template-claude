@@ -32,7 +32,7 @@ WORKDIR /app
 FROM base AS dependencies
 
 # Third-party dependencies first, so this layer is reused until the lock changes
-COPY pyproject.toml uv.lock README.md ./
+COPY pyproject.toml uv.lock README.md LICENSE ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-install-project
 

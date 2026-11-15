@@ -12,7 +12,7 @@ make ci       # lint, format check, typecheck, tests with coverage
 make verify   # imports, tests, smoke tests, real CLI invocations
 ```
 
-Then run the specific code path you changed, with real input, and check the output is correct and free of warnings. `make verify` only covers `info` and `run`; a new command or option needs its own invocation, for example `uv run my-project run --name test --verbose`.
+Then run the specific code path you changed, with real input, and check the output is correct and free of warnings. `make verify` only covers `info` and `run`; a new command or option needs its own invocation, for example `uv run my-project --debug run --name test`.
 
 If you changed something other than Python code, verify that thing instead: see "Verify what you change" in `AGENTS.md`.
 

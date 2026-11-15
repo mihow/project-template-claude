@@ -5,7 +5,7 @@
 #   - Pull requests → deploys to /pr-{number}/ and posts a preview comment
 #   - Closed pull requests → removes /pr-{number}/ from gh-pages
 #
-# Pull requests from forks get a read-only token, so they are skipped.
+# Pull requests from forks and from Dependabot get a read-only token, so they are skipped.
 #
 # Prerequisites:
 #   1. Enable GitHub Pages: Settings → Pages → Source: "Deploy from a branch" → Branch: gh-pages
@@ -21,9 +21,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, closed]
 
+# Read-only by default. The deploy and cleanup jobs ask for write access themselves,
+# so the build job, which runs code from the pull request, cannot push.
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 env:
   SITE_DIR: site
@@ -34,7 +35,7 @@ jobs:
   # ===========================================================================
   build:
     name: Build Site
-    if: github.event.action != 'closed' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
+    if: github.event.action != 'closed' && (github.event_name == 'push' || (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'))
     runs-on: ubuntu-latest
 
     steps:
@@ -64,6 +65,8 @@ jobs:
   # ===========================================================================
   deploy-main:
     name: Deploy (main)
+    permissions:
+      contents: write
     needs: build
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -95,6 +98,9 @@ jobs:
   # ===========================================================================
   deploy-preview:
     name: Deploy Preview (PR)
+    permissions:
+      contents: write
+      pull-requests: write
     needs: build
     if: github.event_name == 'pull_request' && github.event.action != 'closed'
     runs-on: ubuntu-latest
@@ -160,20 +166,23 @@ jobs:
     name: Remove Preview (PR closed)
     if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
-    concurrency:
-      group: gh-pages-deploy
-      cancel-in-progress: false
+    permissions:
+      contents: write
+    # Not in the gh-pages-deploy concurrency group: a group keeps only one
+    # pending job, so a queued cleanup could be dropped. The push is retried instead.
 
     steps:
-      - name: Checkout gh-pages
-        uses: actions/checkout@v7
-        with:
-          ref: gh-pages
-
-      - name: Remove preview directory
+      - name: Remove preview directory from gh-pages
         env:
           PREVIEW_DIR: pr-${{ github.event.number }}
+          REPO_URL: https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
         run: |
+          if ! git ls-remote --exit-code --heads "$REPO_URL" gh-pages >/dev/null; then
+            echo "No gh-pages branch yet, nothing to remove"
+            exit 0
+          fi
+          git clone --quiet --depth 1 --branch gh-pages "$REPO_URL" pages
+          cd pages
           if [ ! -d "$PREVIEW_DIR" ]; then
             echo "No preview directory $PREVIEW_DIR, nothing to remove"
             exit 0
@@ -181,5 +190,14 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git rm -r --quiet "$PREVIEW_DIR"
-          git commit --quiet -m "chore: remove preview for PR #${{ github.event.number }}"
-          git push
+          git commit --quiet -m "chore: remove preview $PREVIEW_DIR"
+          for attempt in 1 2 3 4 5; do
+            if git push --quiet; then
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt), rebasing on the latest gh-pages"
+            sleep $((attempt * 5))
+            git pull --quiet --rebase
+          done
+          echo "Could not push the cleanup commit" >&2
+          exit 1

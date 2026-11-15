@@ -35,6 +35,13 @@ def tracked_files() -> list[Path]:
     return [ROOT / name for name in out.split("\0") if name and name not in SKIP]
 
 
+def is_git_checkout() -> bool:
+    result = subprocess.run(
+        ["git", "rev-parse", "--is-inside-work-tree"], cwd=ROOT, capture_output=True, check=False
+    )
+    return result.returncode == 0
+
+
 def replace_in_file(path: Path, replacements: list[tuple[str, str]]) -> bool:
     try:
         text = path.read_text(encoding="utf-8")
@@ -47,6 +54,27 @@ def replace_in_file(path: Path, replacements: list[tuple[str, str]]) -> bool:
         return False
     path.write_text(new, encoding="utf-8")
     return True
+
+
+def apply_metadata(args: argparse.Namespace, package: str) -> None:
+    """Fill in author, email, description and URLs.
+
+    These are placeholders in package metadata only. Replacing them in every
+    file would rewrite unrelated prose.
+    """
+    metadata: list[tuple[str, str]] = []
+    if args.author:
+        metadata.append(("Your Name", args.author))
+    if args.email:
+        metadata.append(("you@example.com", args.email))
+    if args.description:
+        metadata.append(("A Claude-first Python project", args.description))
+    if metadata:
+        for path in (ROOT / "pyproject.toml", ROOT / "src" / package / "__init__.py"):
+            replace_in_file(path, metadata)
+    if args.github_user:
+        for path in (ROOT / "pyproject.toml", ROOT / "Dockerfile"):
+            replace_in_file(path, [("yourusername", args.github_user)])
 
 
 def main() -> int:
@@ -67,27 +95,26 @@ def main() -> int:
     title = " ".join(word.capitalize() for word in dist.split("-"))
 
     if not (ROOT / "src" / OLD_PACKAGE).is_dir():
-        print(f"error: src/{OLD_PACKAGE}/ not found; was the project already renamed?", file=sys.stderr)
+        print(
+            f"error: src/{OLD_PACKAGE}/ not found; was the project already renamed?",
+            file=sys.stderr,
+        )
         return 1
     if dist == OLD_DIST:
         print("error: that is the template's placeholder name", file=sys.stderr)
         return 1
 
-    replacements = [(OLD_PACKAGE, package), (OLD_DIST, dist), (OLD_TITLE, title)]
-    if args.author:
-        replacements.append(("Your Name", args.author))
-    if args.email:
-        replacements.append(("you@example.com", args.email))
-    if args.github_user:
-        replacements.append(("yourusername", args.github_user))
-    if args.description:
-        replacements.append(("A Claude-first Python project", args.description))
+    if not is_git_checkout():
+        print("error: not a git checkout; run `git init && git add .` first", file=sys.stderr)
+        return 1
 
-    changed = [p for p in tracked_files() if replace_in_file(p, replacements)]
+    # Move the directory first: if this fails, nothing has been rewritten yet.
+    subprocess.run(["git", "mv", f"src/{OLD_PACKAGE}", f"src/{package}"], cwd=ROOT, check=True)
 
-    subprocess.run(
-        ["git", "mv", f"src/{OLD_PACKAGE}", f"src/{package}"], cwd=ROOT, check=True
-    )
+    names = [(OLD_PACKAGE, package), (OLD_DIST, dist), (OLD_TITLE, title)]
+    changed = [p for p in tracked_files() if replace_in_file(p, names)]
+
+    apply_metadata(args, package)
 
     print(f"Renamed to {dist} (package {package}); updated {len(changed)} files.")
 
@@ -100,7 +127,9 @@ def main() -> int:
     print("\nNext steps:")
     print("  1. make install-dev && make ci && make verify")
     print("  2. grep -rn TODO pyproject.toml src/   # remaining fields to fill in")
-    print("  3. review `git diff`, then delete scripts/init_project.py and the `init` Makefile target")
+    print(
+        "  3. review `git diff`, then delete scripts/init_project.py and the `init` Makefile target"
+    )
     return 0
 
 

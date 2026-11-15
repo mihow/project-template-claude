@@ -6,7 +6,7 @@ A GitHub template for Python projects developed with Claude Code and other codin
 
 - **Agent instructions**: a short `AGENTS.md` that any coding agent can read, imported by `CLAUDE.md`
 - **Claude Code config**: permissions, hooks, skills, one subagent and path-scoped rules in `.claude/`
-- **Enforced verification**: a Stop hook runs `make ci` before Claude finishes a turn that changed code
+- **Enforced verification**: a Stop hook runs `make ci` before Claude finishes while code changes are uncommitted or unpushed
 - **Cloud sessions**: a SessionStart hook installs dependencies in Claude Code on the web
 - **Claude in GitHub**: `@claude` mentions and opt-in pull request review
 - **Python tooling**: Python 3.12+, uv, ruff, pyright, pytest with coverage
@@ -98,9 +98,9 @@ Both files are loaded on every task, so keep them short. Add a line when you hav
 |------|--------|--------------|
 | SessionStart | `.claude/hooks/session-start.sh` | In cloud sessions, runs `uv sync` when `pyproject.toml` or `uv.lock` changed. Does nothing locally. |
 | PostToolUse (Edit, Write) | `.claude/hooks/format.sh` | Formats the edited Python file with ruff. |
-| Stop | `.claude/hooks/stop-check.sh` | If Python files, `pyproject.toml` or `uv.lock` have uncommitted changes, runs `make ci`. On failure Claude gets the output and keeps working. |
+| Stop | `.claude/hooks/stop-check.sh` | If Python files, `pyproject.toml` or `uv.lock` have uncommitted changes or are in commits not yet on the upstream branch, runs `make ci`. On failure Claude gets the output and keeps working. |
 
-The Stop hook blocks once per turn. If `make ci` still fails after Claude's second attempt, Claude stops and reports the failure.
+The Stop hook blocks once per turn. If `make ci` still fails after Claude's second attempt, Claude stops and reports the failure. It looks at the working tree, not at who changed it: if your tree already has failing changes, Claude is asked to fix them once. After a push the hook has nothing to check, and CI takes over.
 
 ### Skills and agents
 
@@ -147,7 +147,7 @@ Code is not done until it has been run.
 1. Unit tests are necessary but not sufficient: they prove the code satisfies the tests.
 2. `tests/test_smoke.py` runs the installed CLI as a subprocess.
 3. `make verify` runs imports, tests, smoke tests and the CLI.
-4. The Stop hook makes `make ci` a requirement, not a suggestion.
+4. The Stop hook runs `make ci` whenever code changes are uncommitted or unpushed, so Claude sees failures before it reports back.
 
 See "Verify what you change" in `AGENTS.md` for what to run for each kind of change.
 

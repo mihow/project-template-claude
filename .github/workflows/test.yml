@@ -142,7 +142,7 @@ jobs:
           path: dist/
 
   # ===========================================================================
-  # Docker Build (also runs the test stage, so the image is checked on every PR)
+  # Docker Build: runs the tests inside the image, then builds production
   # ===========================================================================
   docker:
     name: Docker Build
@@ -156,7 +156,16 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      - name: Build Docker image
+      - name: Run tests in Docker (test stage)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          target: test
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build production image
         uses: docker/build-push-action@v7
         with:
           context: .
