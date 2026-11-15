@@ -53,6 +53,8 @@ Make the changes on a branch. Verify each one the way `AGENTS.md` says: run
 `make ci` and `make verify`, run hook scripts directly with sample input, lint
 workflows with `uvx --from actionlint-py actionlint`, and check that every
 action input you use exists in that action's `action.yml` at the pinned tag.
+Confirm each pinned tag exists with `git ls-remote --tags`: some actions
+(`astral-sh/setup-uv`) publish no floating major tag and need a full version.
 Do not include a change you could not verify; list it in the pull request as a
 suggestion instead.
 
